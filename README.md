@@ -13,12 +13,15 @@ mapping or source data and see how it affects result.
 ## HL7 v2 to FHIR Bundle
 
 Mapping file: `adt.yml`
+
 Source message: `adt.hl7`
+
 Executable script: `jute-hl7.js`
 
 ## Mapping tutorial
 
 Both mappings and source data are in same file: `tutorial.yml`
+
 Executable script: `tutorial.js`
 
 ## How to make scripts work
