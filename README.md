@@ -4,7 +4,7 @@ This repository contains example HL7 v2 to FHIR Bundle mapping written
 in JUTE language.
 
 Also there is
-[FHIR Mapping Language tutorial](build.fhir.org/mapping-tutorial.html)
+[FHIR Mapping Language tutorial](http://build.fhir.org/mapping-tutorial.html)
 translated to JUTE.
 
 Both examples are executable, so you can alter
