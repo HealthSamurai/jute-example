@@ -1,0 +1,151 @@
+step1 result: 
+{
+  "TRight": {
+    "a": "foo"
+  }
+}
+
+step2 result: 
+{
+  "TRight": {
+    "a2": "foo"
+  }
+}
+
+step3 result: 
+{
+  "TRight": {
+    "a2": "hey I'm a long strin",
+    "a2_alt": "hey I'm a long strin"
+  }
+}
+
+step4 result: 
+{
+  "TRight": {
+    "a21": 42,
+    "a21_alt": 42
+  }
+}
+
+step5 result: 
+{
+  "TRight": {
+    "a22": [
+      "a list",
+      "of strings",
+      "third string"
+    ]
+  }
+}
+
+step6 result: 
+{
+  "TRight": {
+    "a23": 42
+  }
+}
+
+step7 result: 
+{
+  "TRight": {
+    "aa": [
+      {
+        "ab": "first string"
+      },
+      {
+        "ab": "second string"
+      }
+    ],
+    "aa_alt": [
+      {
+        "ab": "First string"
+      },
+      {
+        "ab": "Second string"
+      }
+    ]
+  }
+}
+
+step8 result: 
+{
+  "TRight": {
+    "d": "male"
+  }
+}
+
+step9 result: 
+{
+  "TRight": {
+    "k": "value"
+  }
+}
+
+step10_1 result: 
+{
+  "TRight": [
+    {
+      "f": "another string",
+      "g": "g2"
+    },
+    {
+      "f": "foo",
+      "g": "g1"
+    },
+    {
+      "f": "bar",
+      "g": "g1"
+    },
+    {
+      "f": "baz",
+      "g": "g1"
+    }
+  ]
+}
+
+step10_2 result: 
+{
+  "TRight": {
+    "az1": [
+      {
+        "az2": "some string",
+        "az3": "foo"
+      },
+      {
+        "az2": "some string",
+        "az3": "bar"
+      },
+      {
+        "az2": "some string",
+        "az3": "baz"
+      }
+    ]
+  }
+}
+
+step_11 result: 
+{
+  "TRight": {
+    "ptr": {
+      "reference": "TRight2/a8cd76db952b9803be9163ead5dc4a2d"
+    }
+  },
+  "TRight2": {
+    "id": "a8cd76db952b9803be9163ead5dc4a2d",
+    "f1": "foo, bar, baz"
+  }
+}
+
+step_12 result: 
+{
+  "TRight": [
+    {
+      "f2": [
+        "bar",
+        "baz"
+      ]
+    }
+  ]
+}
+

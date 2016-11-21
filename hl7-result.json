@@ -1,0 +1,204 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "request": {
+        "method": "PUT",
+        "url": "/Patient/b33b70a29e3eca3d33727017e6bb35a8"
+      },
+      "resource": {
+        "id": "b33b70a29e3eca3d33727017e6bb35a8",
+        "resourceType": "Patient",
+        "deceasedBoolean": "Y",
+        "birthDate": "19330910",
+        "gender": "F",
+        "name": [
+          {
+            "given": [
+              "Luxenburg"
+            ],
+            "middle": [
+              "Ivanovna"
+            ],
+            "family": [
+              "Wanda"
+            ],
+            "text": "LUXENBURG IVANOVNA WANDA"
+          }
+        ],
+        "address": [
+          {
+            "line": [
+              "STRAWBERRY AVE",
+              "FOUR OAKS LODGE",
+              "ALBUKERKA"
+            ],
+            "city": "ALBUKERKA",
+            "state": "CA",
+            "postalCode": "98765",
+            "country": "USA",
+            "text": "STRAWBERRY AVE FOUR OAKS LODGE ALBUKERKA CA 98765 USA"
+          }
+        ],
+        "identifier": [
+          {
+            "value": "010107127",
+            "system": "urn:oid:2.16.840.1.113883.4.3.45",
+            "type": {
+              "text": "Patient Number"
+            }
+          },
+          {
+            "value": "160922",
+            "system": "urn:oid:2.16.840.1.113883.4.3.42",
+            "type": {
+              "text": "Medical Record Number"
+            }
+          },
+          {
+            "value": "11115555555",
+            "system": "urn:oid:2.16.840.1.113883.4.3.46",
+            "type": {
+              "text": "Account Number"
+            }
+          },
+          {
+            "value": "333-22-1111",
+            "system": "http://hl7.org/fhir/sid/us-ssn",
+            "type": {
+              "text": "Social Security Number"
+            }
+          }
+        ],
+        "telecom": [
+          {
+            "value": "(111)222-3333",
+            "system": "phone"
+          }
+        ],
+        "contact": [
+          {
+            "gender": "M",
+            "relationship": {
+              "coding": [
+                {
+                  "code": "Z"
+                }
+              ]
+            },
+            "name": {
+              "given": [
+                "LAWRENCE"
+              ],
+              "family": [
+                "MOCK"
+              ],
+              "middle": [
+                "E"
+              ],
+              "text": "LAWRENCE E MOCK"
+            },
+            "address": {
+              "line": [
+                "4357 COBBLESTONE LANE",
+                "LA CANDADA"
+              ],
+              "city": "LA CANDADA",
+              "state": "CA",
+              "postalCode": "91011",
+              "text": "4357 COBBLESTONE LANE  LA CANDADA CA 91011",
+              "use": "Mailing Address"
+            }
+          },
+          {
+            "gender": "M",
+            "relationship": {
+              "coding": [
+                {
+                  "code": "Z"
+                }
+              ]
+            },
+            "name": {
+              "given": [
+                "RUSSEL"
+              ],
+              "family": [
+                "MOCK"
+              ],
+              "text": "RUSSEL  MOCK"
+            },
+            "address": {
+              "line": [
+                "3420 LE BETHON ST",
+                "SUNLAND"
+              ],
+              "city": "SUNLAND",
+              "state": "CA",
+              "postalCode": "91040",
+              "text": "3420 LE BETHON ST  SUNLAND CA 91040",
+              "use": "Mailing Address"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/Coverage"
+      },
+      "resource": {
+        "resourceType": "Coverage",
+        "identifier": {
+          "system": "urn:oid:2.16.840.1.113883.4.3.45"
+        },
+        "subscriber": {
+          "reference": "Patient/b33b70a29e3eca3d33727017e6bb35a8"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "/Encounter/fae0b27c451c728867a567e8c1bb4e53"
+      },
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "fae0b27c451c728867a567e8c1bb4e53",
+        "class": "I",
+        "identifier": [
+          {
+            "value": "666"
+          }
+        ],
+        "status": "planned",
+        "period": {
+          "start": "201307021300"
+        },
+        "participant": [
+          {
+            "individual": {
+              "reference": "Practitioner/ea82e6c2c3303938ba6b79cc7d6a8991"
+            }
+          },
+          {
+            "individual": {
+              "reference": "Practitioner/37a6259cc0c1dae299a7866489dff0bd"
+            }
+          }
+        ],
+        "patient": {
+          "reference": "Patient/b33b70a29e3eca3d33727017e6bb35a8"
+        },
+        "location": {
+          "location": {
+            "reference": "Location/4b66dd000cee39759ac8437db22f4bb9"
+          },
+          "status": "active"
+        }
+      }
+    }
+  ]
+}
