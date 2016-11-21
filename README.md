@@ -5,9 +5,9 @@ in JUTE language.
 
 Also there is
 [FHIR Mapping Language tutorial](build.fhir.org/mapping-tutorial.html)
-examples translated to JUTE.
+translated to JUTE.
 
-Both examples are executable, so you can play with them altering
+Both examples are executable, so you can alter
 mapping or source data and see how it affects result.
 
 ## HL7 v2 to FHIR Bundle
