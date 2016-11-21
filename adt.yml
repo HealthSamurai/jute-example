@@ -1,0 +1,294 @@
+resourceType: Bundle
+type: transaction
+entry:
+  $filter: flatten
+  $body:
+    - request:
+        method: PUT
+        url: "/Patient/{{ PID.3 |> md5 }}"
+      resource:
+        id: $ PID.3 |> md5
+        resourceType: Patient
+        multipleBirthInteger: $ PID.24
+        deceasedBoolean: $ PID.30
+        birthDate: $ PID.7 |> dateTime
+        gender: $ PID.8 |> translateCode("gender")
+
+        name:
+          $map: PID.5
+          $as: name
+          $body:
+            period:
+              start: $ name.12 |> dateTime
+              end: $ name.13 |> dateTime
+
+            given:
+              - $ name.2 |> capitalize
+            middle:
+              - $ name.3 |> capitalize
+            family:
+              - $ name.1 |> capitalize
+            suffix:
+              - $ name.4 |> capitalize
+            prefix:
+              - $ name.5 |> capitalize
+
+            text: '{{name.5}} {{name.2}} {{name.3}} {{name.1}} {{name.4}} {{name.6}}'
+
+        address:
+          $map: PID.11
+          $as: addr
+          $body:
+            line:
+              - $ addr.1
+              - $ addr.2
+              - $ addr.3
+
+            city: $ addr.3
+            state: $ addr.4
+            postalCode: $ addr.5
+            country: $ addr.6
+            period:
+              start: $ addr.12 |> dateTime
+              end: $ addr.13 |> dateTime
+            text: "{{addr.1}} {{addr.2}} {{addr.3}} {{addr.4}} {{addr.5}} {{addr.6}}"
+
+        identifier:
+          $filter: flatten
+          $body:
+            - $map: PID.2 | PID.3 | PID.4 | PID.18
+              $as: id
+              $body:
+                $if: id.1
+                value: $ id.1
+                system:
+                  $switch: id.5
+                  'MR': urn:oid:2.16.840.1.113883.4.3.42
+                  'PN': urn:oid:2.16.840.1.113883.4.3.45
+                  'AN': urn:oid:2.16.840.1.113883.4.3.46
+
+                period:
+                  start: $ id.7 |> dateTime
+                  end: $ id.8 |> dateTime
+
+                type:
+                  text:
+                    $switch: id.5
+                    'MR': Medical Record Number
+                    'PN': Patient Number
+                    'AN': Account Number
+
+            - $if: PID.19
+              value: $ PID.19
+              system: http://hl7.org/fhir/sid/us-ssn
+              type:
+                text: Social Security Number
+
+            - $if: PID.20.1
+              value: '{{PID.20.1}} {{PID.20.2}}'
+              system: urn:oid:2.16.840.1.113883.4.3.36
+              type:
+                text: Driver License
+
+        telecom:
+          $map: PID.13 | PID.14
+          $as: tel
+          $body:
+            value: $ tel.1
+            system: "phone"
+
+            # $if: tel.1
+            # $body:
+            #   use:
+            #     $case: tel.path
+            #     'PID.13': home
+            #     'PID.14': work
+
+            #   value: $ tel.1
+            #   system: "phone"
+
+        contact:
+          $map: NK1
+          $as: nk1
+          $body:
+            period:
+              start: $ nk1.8
+              end: $ nk1.9
+
+            gender: $ nk1.15 |> translateCode("gender")
+            relationship:
+              coding:
+                - code: $ nk1.3.1
+
+            name:
+              period:
+                start: $ nk1.2.0.12 |> dateTime
+                end: $ nk1.2.0.13 |> dateTime
+              use: $ nk1.2.0.7
+
+              given:
+                - $ nk1.2.0.2
+              family:
+                - $ nk1.2.0.1
+              middle:
+                - $ nk1.2.0.3
+              suffix:
+                - $ nk1.2.0.4
+              prefix:
+                - $ nk1.2.0.5
+              text: '{{nk1.2.0.5}} {{nk1.2.0.2}} {{nk1.2.0.3}} {{nk1.2.0.1}} {{nk1.2.0.4}} {{nk1.2.0.6}}'
+
+            address:
+              line:
+                - $ nk1.4.0.1
+                - $ nk1.4.0.2
+                - $ nk1.4.0.3
+
+              city: $ nk1.4.0.3
+              state: $ nk1.4.0.4
+              postalCode: $ nk1.4.0.5
+              country: $ nk1.4.0.6
+              period:
+                start: $ nk1.4.0.12 |> dateTime
+                end: $ nk1.4.0.13 |> dateTime
+
+              text: "{{nk1.4.0.1}} {{nk1.4.0.2}} {{nk1.4.0.3}} {{nk1.4.0.4}} {{nk1.4.0.5}} {{nk1.4.0.6}}"
+
+              type: $ nk1.4.0.7
+              use: 'Mailing Address'
+
+    - request:
+        method: POST
+        url: /Coverage
+      resource:
+        $let:
+          in1: $ PV1.IN1.0
+        $body:
+          resourceType: Coverage
+
+          identifier:
+            value: $ PID.3.1
+            system: urn:oid:2.16.840.1.113883.4.3.45
+
+          name: $ in1.4
+          phone: $ in1.7
+
+          subscriberFirstName: $ in1.16.0.2
+          subscriberMiddleName: $ in1.16.0.3
+          subscriberLastName: $ in1.16.0.1
+
+          subscriberDOB: $ in1.18 |> dateTime
+          effectiveDate: $ in1.12 |> dateTime
+
+          subscriber:
+            reference: "Patient/{{ PID.3 |> md5 }}"
+
+          policyNumber: $ in1.15
+          groupNumber: $ in1.8
+
+          preAuthorizationNumber: $ in1.14.1
+          preAuthorizationDays: $ in1.14.22
+
+          period:
+            start: $ in1.13 |> dateTime
+            end: $ in1.14 |> dateTime
+
+    - request:
+        method: PUT
+        url: "/Encounter/{{ PV1.19.1 |> md5 }}"
+      resource:
+        resourceType: Encounter
+        id: $ PV1.19.1 |> md5
+        class: $ PV1.2
+        identifier:
+          - value: $ PV1.19.1
+
+        status: planned
+
+        period:
+          start: $ PV1.44 |> dateTime
+
+        participant:
+          $map: PV1.7 | PV1.8 | PV1.9 | PV1.17
+          $as: physician
+          $body:
+            # $if: physician.1
+            # type:
+            #   coding:
+            #     - code:
+            #         $case: physician.path
+            #         'PV1.7': ATND
+            #         'PV1.8': REF
+            #         'PV1.9': CON
+            #         'PV1.17': ADM
+            #       system: http://hl7.org/fhir/v3/ParticipationType
+
+            # period:
+            individual:
+              reference: "Practitioner/{{physician.1 |> md5}}"
+
+        patient:
+          reference: "Patient/{{ PID.3 |> md5 }}"
+
+        location:
+          location:
+            reference: "Location/{{ PV1.3 |> md5 }}"
+          status: active
+
+    # - $filter: uniq("resource.id")
+    #   $value:
+    #     $foreach: PV1.7, PV1.8, PV1.9, PV1.17 as physician
+    #     $value:
+    #       $if: physician.1
+    #       $value:
+    #         request:
+    #           method: PUT
+    #           url: "/Practitioner/{{ physician.1 |> md5 }}"
+    #         resource:
+    #           id: $ physician.1 |> md5
+    #           resourceType: Practitioner
+    #           identifier:
+    #             - value: $ physician.1
+
+    #           name:
+    #             text: "{{physician.3}} {{physician.2}}"
+    #             given:
+    #               $foreach: physician.3 as given
+    #               $value: $ given |> capitalize
+    #             middle:
+    #               $foreach: physician.4 as middle
+    #               $value: $ middle |> capitalize
+    #             family:
+    #               $foreach: physician.2 as family
+    #               $value: $ family |> capitalize
+
+    # - $if: PV1.3
+    #   request:
+    #       method: PUT
+    #       url: "/Location/{{ PV1.3 |> md5 }}"
+
+    #   resource:
+    #     $let:
+    #       locationStr:
+    #         $filter:
+    #           - compact
+    #           - join(".")
+
+    #         $value:
+    #           - $ PV1.3.7 |> trim
+    #           - $ PV1.3.8 |> trim
+    #           - $ PV1.3.2 |> trim
+    #           - $ PV1.3.3 |> trim
+
+    #     id: $ PV1.3 |> md5
+    #     resourceType: Location
+    #     status: active
+    #     identifier:
+    #       - value: $ locationStr
+
+    #     building: $ PV1.3.7 |> trim
+    #     floor: $ PV1.3.8 |> trim
+    #     room: $ PV1.3.2 |> trim
+    #     bed: $ PV1.3.3 |> trim
+
+    #     name: $ locationStr

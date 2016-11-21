@@ -1,0 +1,6 @@
+[submodule "jute.js"]
+	path = jute.js
+	url = https://github.com/HealthSamurai/jute.js.git
+[submodule "hl7grok"]
+	path = hl7grok
+	url = https://github.com/HealthSamurai/hl7grok.git

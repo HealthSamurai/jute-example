@@ -1,0 +1,20 @@
+{
+  "name": "jute",
+  "version": "0.0.1",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "coffee-script": "latest",
+    "coffee": "latest",
+    "mocha": "latest",
+    "js-yaml": "latest",
+    "pegjs": "latest",
+    "md5": "latest"
+  },
+  "engines": {
+    "node": ">=0.12.0"
+  },
+  "scripts": {
+    "test": "`npm bin`/mocha --compilers coffee:coffee-script/register spec/runner.coffee || echo 'Tests failed'"
+  }
+}

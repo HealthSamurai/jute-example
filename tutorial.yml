@@ -1,0 +1,249 @@
+# Translation of FHIR Mapping Tutorial
+# http://build.fhir.org/mapping-tutorial.html
+# To JUTE mapping language
+
+step1:
+  source:
+    TLeft:
+      a: "foo"
+
+  mapping:
+    TRight:
+      a: $ TLeft.a
+
+step2:
+  source:
+    TLeft:
+      a1: "foo"
+
+  mapping:
+    TRight:
+      a2: $ TLeft.a1
+
+step3:
+  source:
+    TLeft:
+      a2: "hey I'm a long string containing more than 20 chars really"
+
+  mapping:
+    TRight:
+      # JUTE supports two ways of invoking functions, first one is pipeline style
+      # (aka function composition aka UNIX pipelines), and second is classical (i.e. foo(bar(x)))
+      # JUTE uses |> operator for pipeline syntax because | operator is used for "set union" operation
+      a2: $ TLeft.a2 |> truncate(20) # "pipeline" style of invoking functions
+      a2_alt: $ truncate(TLeft.a2, 20) # "classic" way to invoke function
+
+step4:
+  source:
+    TLeft:
+      a21: "42"
+
+  mapping:
+    TRight:
+      a21: $ TLeft.a21 |> parseInt
+      a21_alt: $ parseInt(TLeft.a21) # same as in prev example
+
+step5:
+  source:
+    TLeft:
+      a22:
+        - a list
+        - of strings
+        - third string
+
+  mapping:
+    TRight:
+      # Arrays are same values as "basic" types like strings or integers,
+      # so when no source modifications are needed, we just copy value directly
+      a22: $ TLeft.a22
+
+step6:
+  source:
+    TLeft:
+      a23:
+        - "42"
+        - "45"
+        - "47"
+
+  mapping:
+    TRight:
+      a23: $ TLeft.a23.0 |> parseInt # querying first element and cast it to integer
+
+step7:
+  source:
+    TLeft:
+      aa:
+        - ab: "first string"
+        - ab: "second string"
+  mapping:
+    TRight:
+      # in most simple case, just copy source array as in step 5
+      aa: $ TLeft.aa
+
+      # if we need to perform some data manipulation inside array,
+      # we're using $map directive
+      aa_alt:
+        $map: TLeft.aa
+        $as: item # variable name for current array item
+        $body:
+          ab: $ item.ab |> capitalize
+
+step8:
+  source:
+    TLeft:
+      d: "male"
+
+  mapping:
+    TRight:
+      # code translation is regular (possible async) function call
+      d: $ TLeft.d |> translateCode("gender")
+
+step9:
+  source:
+    TLeft:
+      i: "value"
+      m: 42
+
+  mapping:
+    TRight:
+      $if: TLeft.m < 2
+      $then:
+        j: $ TLeft.i
+      $else:
+        k: $ TLeft.i
+
+    # another possible solution,
+    # but I haven't added support for logical operators && and ||
+    # to JUTE yet, so it's commented for now
+
+    # TRight_alt:
+    #   j: $ TLeft.m < 2 && TLeft.i || null
+    #   k: $ TLeft.m >= 2 && TLeft.i || null
+
+step10_1:
+  source:
+    TLeft:
+      e:
+        - "foo"
+        - "bar"
+        - "baz"
+      f: "another string"
+
+  mapping:
+    TRight:
+      # Concat directive concatenates arrays found in it's body
+      # to a single array
+      $concat:
+        # value from TLeft.f comes first
+        - f: $ TLeft.f
+          g: "g2"
+
+        - $map: TLeft.e
+          $as: item
+          $body:
+            f: $ item
+            g: "g1"
+
+step10_2:
+  source:
+    TLeft:
+      az1:
+        az2: "some string"
+        az3:
+          - "foo"
+          - "bar"
+          - "baz"
+
+  mapping:
+    TRight:
+      az1:
+        $map: TLeft.az1.az3
+        $as: item
+        $body:
+          az2: $ TLeft.az1.az2
+          az3: $ item
+
+step_11:
+  source:
+    TLeft:
+      f1:
+        - "foo"
+        - "bar"
+        - "baz"
+
+  mapping:
+    # To do cross-linking of several entities I usually take some source data
+    # which could be treated like unique identifier (for instance, PID.3) and then
+    # apply some general-purpose hash function on it to get unique ID.
+
+    # Generating UUID is another approach, but it won't work
+    # when you're going to perform create-or-update logic.
+
+    # In this example I'll use whole TLeft.f1 array for generating ID (case there is no any other data)
+    $let:
+      id: $ TLeft.f1 |> md5 # calculating identifier
+    $body:
+      TRight:
+        ptr:
+          # {{ ... }} is string interpolation syntax, it will
+          # eval expression inside and put it in resulting string
+          reference: "TRight2/{{ id }}" # use id here as part of reference
+
+      TRight2:
+        id: $ id # setting ID for TRight2 resource
+        f1: $ TLeft.f1 |> join(", ")
+
+    sameButWithoutLetDirective:
+      TRight:
+        ptr:
+          reference: "TRight2/{{ TLeft.f1 |> md5 }}"
+
+      TRight2:
+        id: $ TLeft.f1 |> md5
+        f1: $ TLeft.f1 |> join(", ")
+
+step_12:
+  # Resource search (FHIR Search) and resolving resource references are both
+  # just function calls:
+
+  example1: # this example is non-executable (no fhirSearch and formatName function)
+    $let:
+      patientBundle: $ fhirSearch("Patient", "name=john")
+    $body:
+      $map: patientBundle.entry
+      $as: entry
+      $body:
+        name: entry.resource.name |> formatName
+
+  example2: # this example is non-executable (no resolveReference and formatName function)
+    $let:
+      encounter:
+        resourceType: Encounter
+        subject:
+          reference: Patient/some-patient-id
+    $body:
+      $let:
+        patient: $ encounter.subject |> resolveReference
+      $body:
+        name: patient.name |> formatName
+
+  # I'm assuming that resource retrievement was already done,
+  # so we're starting with array of resources
+  source:
+    TLeft:
+      - f2: "foo"
+        i: 3
+
+      - f2: "bar"
+        i: 1
+
+      - f2: "baz"
+        i: 2
+
+  mapping:
+    TRight:
+      $map: TLeft.f2
+      $as: item
+      $body:
+        # This expression will return all TLeft's f2s where TLeft.i < 3
+        f2: $ TLeft.*(i < 3).f2
