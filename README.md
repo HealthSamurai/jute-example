@@ -18,11 +18,15 @@ Source message: `adt.hl7`
 
 Executable script: `jute-hl7.js`
 
+Result: `hl7-result.json`
+
 ## Mapping tutorial
 
 Both mappings and source data are in same file: `tutorial.yml`
 
 Executable script: `tutorial.js`
+
+Result: `tutorial-result.txt`
 
 ## How to make scripts work
 
