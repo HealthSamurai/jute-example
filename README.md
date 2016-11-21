@@ -1,7 +1,7 @@
 # JUTE Examples
 
 This repository contains example HL7 v2 to FHIR Bundle mapping written
-in JUTE language.
+in [JUTE language](https://github.com/HealthSamurai/jute.js).
 
 Also there is
 [FHIR Mapping Language tutorial](http://build.fhir.org/mapping-tutorial.html)
