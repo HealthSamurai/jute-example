@@ -3,165 +3,160 @@ type: transaction
 entry:
   $filter: flatten
   $body:
-    - $map: RESPONSE
-      $as: res
+    $map: RESPONSE
+    $as: res
+    $body:
+      $let:
+        pid: $ res.PATIENT.PID
       $body:
-        $let:
-          pid: $ res.PATIENT.PID
+        $filter: flatten
         $body:
-          request:
-            method: PUT
-            url: "/Patient/{{ pid.3 |> md5 }}"
-          resource:
-            id: $ pid.3 |> md5
-            resourceType: Patient
-            multipleBirthInteger: $ pid.24
-            deceasedBoolean: $ pid.30
-            birthDate: $ pid.7 |> dateTime
-            gender: $ pid.8 |> translateCode("gender")
-            name:
-              $map: pid.5
-              $as: name
-              $body:
-                period:
-                  start: $ name.12 |> dateTime
-                  end: $ name.13 |> dateTime
+          - request:
+              method: PUT
+              url: "/Patient/{{ pid.3 |> md5 }}"
+            resource:
+              id: $ pid.3 |> md5
+              resourceType: Patient
+              multipleBirthInteger: $ pid.24
+              deceasedBoolean: $ pid.30
+              birthDate: $ pid.7 |> dateTime
+              gender: $ pid.8 |> translateCode("gender")
+              name:
+                $map: pid.5
+                $as: name
+                $body:
+                  period:
+                    start: $ name.12 |> dateTime
+                    end: $ name.13 |> dateTime
 
-                given:
-                  - $ name.2 |> capitalize
-                middle:
-                  - $ name.3 |> capitalize
-                family:
-                  - $ name.1 |> capitalize
-                suffix:
-                  - $ name.4 |> capitalize
-                prefix:
-                  - $ name.5 |> capitalize
+                  given:
+                    - $ name.2 |> capitalize
+                  middle:
+                    - $ name.3 |> capitalize
+                  family:
+                    - $ name.1 |> capitalize
+                  suffix:
+                    - $ name.4 |> capitalize
+                  prefix:
+                    - $ name.5 |> capitalize
 
-                text: '{{name.5}} {{name.2}} {{name.3}} {{name.1}} {{name.4}} {{name.6}}'
+                  text: '{{name.5}} {{name.2}} {{name.3}} {{name.1}} {{name.4}} {{name.6}}'
 
-            address:
-              $map: pid.11
-              $as: addr
-              $body:
-                line:
-                  - $ addr.1
-                  - $ addr.2
-                  - $ addr.3
+              address:
+                $map: pid.11
+                $as: addr
+                $body:
+                  line:
+                    - $ addr.1
+                    - $ addr.2
+                    - $ addr.3
 
-                city: $ addr.3
-                state: $ addr.4
-                postalCode: $ addr.5
-                country: $ addr.6
-                period:
-                  start: $ addr.12 |> dateTime
-                  end: $ addr.13 |> dateTime
-                text: "{{addr.1}} {{addr.2}} {{addr.3}} {{addr.4}} {{addr.5}} {{addr.6}}"
+                  city: $ addr.3
+                  state: $ addr.4
+                  postalCode: $ addr.5
+                  country: $ addr.6
+                  period:
+                    start: $ addr.12 |> dateTime
+                    end: $ addr.13 |> dateTime
+                  text: "{{addr.1}} {{addr.2}} {{addr.3}} {{addr.4}} {{addr.5}} {{addr.6}}"
 
-            identifier:
-              $filter: flatten
-              $body:
-                - $map: pid.2 | pid.3 | pid.4 | pid.18
-                  $as: id
-                  $body:
-                    $if: id.1
-                    value: $ id.1
-                    system:
-                      $switch: id.5
-                      'MR': urn:oid:2.16.840.1.113883.4.3.42
-                      'PN': urn:oid:2.16.840.1.113883.4.3.45
-                      'AN': urn:oid:2.16.840.1.113883.4.3.46
-
-                    period:
-                      start: $ id.7 |> dateTime
-                      end: $ id.8 |> dateTime
-
-                    type:
-                      text:
+              identifier:
+                $filter: flatten
+                $body:
+                  - $map: pid.2 | pid.3 | pid.4 | pid.18
+                    $as: id
+                    $body:
+                      $if: id.1
+                      value: $ id.1
+                      system:
                         $switch: id.5
-                        'MR': Medical Record Number
-                        'PN': Patient Number
-                        'AN': Account Number
+                        'MR': urn:oid:2.16.840.1.113883.4.3.42
+                        'PN': urn:oid:2.16.840.1.113883.4.3.45
+                        'AN': urn:oid:2.16.840.1.113883.4.3.46
 
-                - $if: pid.19
-                  value: $ pid.19
-                  system: http://hl7.org/fhir/sid/us-ssn
-                  type:
-                    text: Social Security Number
+                      period:
+                        start: $ id.7 |> dateTime
+                        end: $ id.8 |> dateTime
 
-                - $if: pid.20.1
-                  value: '{{pid.20.1}} {{pid.20.2}}'
-                  system: urn:oid:2.16.840.1.113883.4.3.36
-                  type:
-                    text: Driver License
+                      type:
+                        text:
+                          $switch: id.5
+                          'MR': Medical Record Number
+                          'PN': Patient Number
+                          'AN': Account Number
 
-            telecom:
-              $map: pid.13 | pid.14
-              $as: tel
-              $body:
-                value: $ tel.1
-                system: "phone"
+                  - $if: pid.19
+                    value: $ pid.19
+                    system: http://hl7.org/fhir/sid/us-ssn
+                    type:
+                      text: Social Security Number
 
-    - request:
-        method: PUT
-        url: "/Patient/{{ PID.3 |> md5 }}"
-      resource:
-        id: $ PID.3 |> md5
-        resourceType: Patient
-        multipleBirthInteger: $ RESPONSE.0.PATIENT.PID.24
-        deceasedBoolean: $ PID.30
-        birthDate: $ PID.7 |> dateTime
-        gender: $ PID.8 |> translateCode("gender")
+                  - $if: pid.20.1
+                    value: '{{pid.20.1}} {{pid.20.2}}'
+                    system: urn:oid:2.16.840.1.113883.4.3.36
+                    type:
+                      text: Driver License
 
-    - request:
-        method: PUT
-        url: "/Observation/jute-observation"
-      resource:
-        id: jute-observation
-        resourceType: Observation
-        effectiveDateTime: "2016-12-05T09:30:10+01:00"
-        status: final
-        category:
-          - text: Vital Signs
-            coding:
-              - code: vital-signs
-                system: http://hl7.org/fhir/observation-category
-                display: Vital Signs
-        referenceRange:
-          - low:
-              code: "%"
-              unit: "%"
-              value: 90
-              system: http://unitsofmeasure.org
-            high:
-              code: "%"
-              unit: "%"
-              value: 99
-              system: http://unitsofmeasure.org
-        interpretation:
-          text: Normal (applies to non-numeric results)
-          coding:
-            - code: N
-              system: http://hl7.org/fhir/v2/0078
-              display: Normal
-        valueQuantity:
-          code: "%"
-          unit: "%"
-          value: 95
-          system: http://unitsofmeasure.org
-        code:
-          coding:
-            - code: "59408-5"
-              system: http://loinc.org
-              display: Oxygen saturation in Arterial blood by Pulse oximetry
-            - code: "150456"
-              system: https://rtmms.nist.gov
-              display: MDC_PULS_OXIM_SAT_O2
-        identifier:
-          - value: "o1223435-10"
-            system: http://goodcare.org/observation/id
-        subject:
-          reference: "Patient/jute-patient"
-        text:
-          div: "<div></div>"
-          status: generated
+              telecom:
+                $map: pid.13 | pid.14
+                $as: tel
+                $body:
+                  value: $ tel.1
+                  system: "phone"
+
+          - $map: res.ORDER_OBSERVATION
+            $as: ord
+            $body:
+              request:
+                ord: $ ord
+                method: PUT
+                url: "/Observation/jute-observation"
+              resource:
+                id: jute-observation
+                resourceType: Observation
+                effectiveDateTime: "2016-12-05T09:30:10+01:00"
+                status: final
+                category:
+                  - text: Vital Signs
+                    coding:
+                      - code: vital-signs
+                        system: http://hl7.org/fhir/observation-category
+                        display: Vital Signs
+                referenceRange:
+                  - low:
+                      code: "%"
+                      unit: "%"
+                      value: 90
+                      system: http://unitsofmeasure.org
+                    high:
+                      code: "%"
+                      unit: "%"
+                      value: 99
+                      system: http://unitsofmeasure.org
+                interpretation:
+                  text: Normal (applies to non-numeric results)
+                  coding:
+                    - code: N
+                      system: http://hl7.org/fhir/v2/0078
+                      display: Normal
+                valueQuantity:
+                  code: "%"
+                  unit: "%"
+                  value: 95
+                  system: http://unitsofmeasure.org
+                code:
+                  coding:
+                    - code: "59408-5"
+                      system: http://loinc.org
+                      display: Oxygen saturation in Arterial blood by Pulse oximetry
+                    - code: "150456"
+                      system: https://rtmms.nist.gov
+                      display: MDC_PULS_OXIM_SAT_O2
+                identifier:
+                  - value: "o1223435-10"
+                    system: http://goodcare.org/observation/id
+                subject:
+                  reference: "/Patient/{{ pid.3 |> md5 }}"
+                text:
+                  div: "<div></div>"
+                  status: generated
