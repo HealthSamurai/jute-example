@@ -124,58 +124,67 @@ entry:
           - $map: res.ORDER_OBSERVATION
             $as: ord
             $body:
-              request:
-                ord: $ ord
-                method: PUT
-                url: "/Observation/jute-observation"
-              resource:
-                id: jute-observation
-                resourceType: Observation
-                effectiveDateTime: "2016-12-05T09:30:10+01:00"
-                status: final
-                category:
-                  - text: Vital Signs
-                    coding:
-                      - code: vital-signs
-                        system: http://hl7.org/fhir/observation-category
-                        display: Vital Signs
-                referenceRange:
-                  - low:
-                      code: "%"
-                      unit: "%"
-                      value: 90
-                      system: http://unitsofmeasure.org
-                    high:
-                      code: "%"
-                      unit: "%"
-                      value: 99
-                      system: http://unitsofmeasure.org
-                interpretation:
-                  text: Normal (applies to non-numeric results)
-                  coding:
-                    - code: N
-                      system: http://hl7.org/fhir/v2/0078
-                      display: Normal
-                valueQuantity:
-                  code: "%"
-                  unit: "%"
-                  value: 95
-                  system: http://unitsofmeasure.org
-                code:
-                  coding:
-                    - code: "59408-5"
-                      system: http://loinc.org
-                      display: Oxygen saturation in Arterial blood by Pulse oximetry
-                    - code: "150456"
-                      system: https://rtmms.nist.gov
-                      display: MDC_PULS_OXIM_SAT_O2
-                identifier:
-                  - value: "o1223435-10"
-                    system: http://goodcare.org/observation/id
-                subject:
-                  reference: "/Patient/{{ pid.3 |> md5 }}"
-                encounter:
-                  reference: "/Encounter/{{ pv1.19.1 |> md5 }}"
-                text:
-                  div: "<div></div>"
-                  status: generated
+              $filter: flatten
+              $body:
+                $map: ord.OBSERVATION
+                $as: obs
+                $body:
+                  $let:
+                    obr: $ ord.OBR
+                    obx: $ obs.OBX
+                    identifier: "{{ ord.OBR.3.1 }} {{ obs.OBX.3.1 }}"
+                  $body:
+                    request:
+                      method: PUT
+                      url: "/Observation/{{ identifier |> md5 }}"
+                    resource:
+                      id: $ identifier |> md5
+                      resourceType: Observation
+                      effectiveDateTime: "2016-12-05T09:30:10+01:00"
+                      status: final
+                      category:
+                        - text: Vital Signs
+                          coding:
+                            - code: vital-signs
+                              system: http://hl7.org/fhir/observation-category
+                              display: Vital Signs
+                      referenceRange:
+                        - low:
+                            code: "%"
+                            unit: $ obx.6.2
+                            value: $ obx.7
+                            system: http://unitsofmeasure.org
+                          high:
+                            code: "%"
+                            unit: $ obx.6.2
+                            value: $ obx.7
+                            system: http://unitsofmeasure.org
+                      interpretation:
+                        text: Normal (applies to non-numeric results)
+                        coding:
+                          - code: N
+                            system: http://hl7.org/fhir/v2/0078
+                            display: Normal
+                      valueQuantity:
+                        code: "%"
+                        unit: $ obx.6.2
+                        value: $ obx.5.0
+                        system: http://unitsofmeasure.org
+                      code:
+                        coding:
+                          - code: "59408-5"
+                            system: http://loinc.org
+                            display: Oxygen saturation in Arterial blood by Pulse oximetry
+                          - code: "150456"
+                            system: https://rtmms.nist.gov
+                            display: MDC_PULS_OXIM_SAT_O2
+                      identifier:
+                        - value: $ identifier
+
+                      subject:
+                        reference: "/Patient/{{ pid.3 |> md5 }}"
+                      encounter:
+                        reference: "/Encounter/{{ pv1.19.1 |> md5 }}"
+                      text:
+                        div: "<div></div>"
+                        status: generated
