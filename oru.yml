@@ -8,6 +8,7 @@ entry:
     $body:
       $let:
         pid: $ res.PATIENT.PID
+        pv1: $ res.PATIENT.VISIT.PV1
       $body:
         $filter: flatten
         $body:
@@ -104,6 +105,22 @@ entry:
                   value: $ tel.1
                   system: "phone"
 
+          - request:
+              method: PUT
+              url: "/Encounter/{{ pv1.19.1 |> md5 }}"
+            resource:
+              resourceType: Encounter
+              id: $ pv1.19.1 |> md5
+              class: $ pv1.2
+              identifier:
+                - value: $ pv1.19.1
+
+              status: planned
+              period:
+                start: $ pv1.44 |> dateTime
+              patient:
+                reference: "Patient/{{ pid.3 |> md5 }}"
+
           - $map: res.ORDER_OBSERVATION
             $as: ord
             $body:
@@ -157,6 +174,8 @@ entry:
                     system: http://goodcare.org/observation/id
                 subject:
                   reference: "/Patient/{{ pid.3 |> md5 }}"
+                encounter:
+                  reference: "/Encounter/{{ pv1.19.1 |> md5 }}"
                 text:
                   div: "<div></div>"
                   status: generated
