@@ -3,12 +3,115 @@ type: transaction
 entry:
   $filter: flatten
   $body:
+    - $map: RESPONSE
+      $as: res
+      $body:
+        $let:
+          pid: $ res.PATIENT.PID
+        $body:
+          request:
+            method: PUT
+            url: "/Patient/{{ pid.3 |> md5 }}"
+          resource:
+            id: $ pid.3 |> md5
+            resourceType: Patient
+            multipleBirthInteger: $ pid.24
+            deceasedBoolean: $ pid.30
+            birthDate: $ pid.7 |> dateTime
+            gender: $ pid.8 |> translateCode("gender")
+            name:
+              $map: pid.5
+              $as: name
+              $body:
+                period:
+                  start: $ name.12 |> dateTime
+                  end: $ name.13 |> dateTime
+
+                given:
+                  - $ name.2 |> capitalize
+                middle:
+                  - $ name.3 |> capitalize
+                family:
+                  - $ name.1 |> capitalize
+                suffix:
+                  - $ name.4 |> capitalize
+                prefix:
+                  - $ name.5 |> capitalize
+
+                text: '{{name.5}} {{name.2}} {{name.3}} {{name.1}} {{name.4}} {{name.6}}'
+
+            address:
+              $map: pid.11
+              $as: addr
+              $body:
+                line:
+                  - $ addr.1
+                  - $ addr.2
+                  - $ addr.3
+
+                city: $ addr.3
+                state: $ addr.4
+                postalCode: $ addr.5
+                country: $ addr.6
+                period:
+                  start: $ addr.12 |> dateTime
+                  end: $ addr.13 |> dateTime
+                text: "{{addr.1}} {{addr.2}} {{addr.3}} {{addr.4}} {{addr.5}} {{addr.6}}"
+
+            identifier:
+              $filter: flatten
+              $body:
+                - $map: pid.2 | pid.3 | pid.4 | pid.18
+                  $as: id
+                  $body:
+                    $if: id.1
+                    value: $ id.1
+                    system:
+                      $switch: id.5
+                      'MR': urn:oid:2.16.840.1.113883.4.3.42
+                      'PN': urn:oid:2.16.840.1.113883.4.3.45
+                      'AN': urn:oid:2.16.840.1.113883.4.3.46
+
+                    period:
+                      start: $ id.7 |> dateTime
+                      end: $ id.8 |> dateTime
+
+                    type:
+                      text:
+                        $switch: id.5
+                        'MR': Medical Record Number
+                        'PN': Patient Number
+                        'AN': Account Number
+
+                - $if: pid.19
+                  value: $ pid.19
+                  system: http://hl7.org/fhir/sid/us-ssn
+                  type:
+                    text: Social Security Number
+
+                - $if: pid.20.1
+                  value: '{{pid.20.1}} {{pid.20.2}}'
+                  system: urn:oid:2.16.840.1.113883.4.3.36
+                  type:
+                    text: Driver License
+
+            telecom:
+              $map: pid.13 | pid.14
+              $as: tel
+              $body:
+                value: $ tel.1
+                system: "phone"
+
     - request:
         method: PUT
-        url: "/Patient/jute-patient"
+        url: "/Patient/{{ PID.3 |> md5 }}"
       resource:
-        id: jute-patient
+        id: $ PID.3 |> md5
         resourceType: Patient
+        multipleBirthInteger: $ RESPONSE.0.PATIENT.PID.24
+        deceasedBoolean: $ PID.30
+        birthDate: $ PID.7 |> dateTime
+        gender: $ PID.8 |> translateCode("gender")
 
     - request:
         method: PUT

@@ -70,6 +70,8 @@ const parsedMsg = hl7grok.grok(msg, {strict: false});
 
 const structurizedMsg = hl7grok.structurize(parsedMsg[0]);
 
+console.log(JSON.stringify(structurizedMsg, null, 2));
+
 console.log("!!!!!!", JSON.stringify(structurizedMsg[1], null, 2));
 
 const transformed = jute.transform(structurizedMsg[0], mapping, { directives: {} });
